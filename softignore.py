@@ -18,7 +18,7 @@
 #
 
 import xchat
-import dbm
+import anydbm
 import os
 
 from itertools import dropwhile
@@ -31,7 +31,8 @@ __module_version__ = '0.96'
 __module_description__ = """With this plug-in, you can prevent some people
 from getting your attention."""
 
-DBFILE = os.environ['HOME'] + '/.config/hexchat/soft-ignore.conf'
+APPDATA = os.environ['APPDATA']
+DBFILE = APPDATA + '\HexChat\soft-ignore.conf'
 SEPARATOR=','
 
 xchat.prnt('%(name)s, version %(version)s' % {'name': __module_name__,
@@ -39,7 +40,7 @@ xchat.prnt('%(name)s, version %(version)s' % {'name': __module_name__,
 
 # loads the database
 encoding = locale.getdefaultlocale()[1]
-db = dbm.open(DBFILE,'c')
+db = anydbm.open(DBFILE,'c')
 try:
     nicks = db['soft-ignore'].decode(encoding).split(SEPARATOR)
 except KeyError:
@@ -85,7 +86,7 @@ def add_soft_ignore(word, word_eol, userdata):
 def soft_ignore_list(word, word_eol, userdata):
     xchat.prnt('\x032Current soft-ignore-list: %d soft-ignored.' % len(nicks) )
     for nick in nicks:
-        xchat.prnt('\x032 --- %s' % nick)
+        xchat.prnt('\x032 *** %s' % nick)
     xchat.prnt('\x032* End of soft-ignore list')
     return xchat.EAT_XCHAT
 
@@ -106,13 +107,14 @@ def delete_soft_ignore(word, word_eol, userdata):
 # filter message according to pattern/nicks
 #
 def ignore_message(word, word_eol, userdata):
-    nick = remove_color(word[0]) # skips the initial coloring
+    nick = word[0]
     if ([p for p in nicks if re.match('^'+p+'$',nick,re.IGNORECASE)] or
         word[1][0]=='~'):
         #should be more or less like the normal 'Channel Message' display
-        xchat.prnt('\00300 <%s>\t%s' % (nick,word[1]))
+        xchat.prnt('\00330 <%s>\t%s' % (nick,word[1]))
         return xchat.EAT_XCHAT
     else:
+        xchat.prnt('no soft-ignore match for ' + word[0])
         return xchat.EAT_NONE
 
 
