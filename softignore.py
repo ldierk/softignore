@@ -114,7 +114,6 @@ def ignore_message(word, word_eol, userdata):
         xchat.prnt('\00330 <%s>\t%s' % (nick,word[1]))
         return xchat.EAT_XCHAT
     else:
-        xchat.prnt('no soft-ignore match for ' + word[0])
         return xchat.EAT_NONE
 
 
